@@ -1,7 +1,7 @@
 {
   "name": "vibecodestorage",
-  "version": "0.1.4",
-  "description": "Encrypted storage JavaScript SDK and CLI. Connect to your own VibeCodeStorage API.",
+  "version": "0.2.0",
+  "description": "Encrypted storage SDK and CLI, plus a browser passkey-auth client with private or app-managed data modes.",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -13,13 +13,19 @@
     ".": {
       "types": "./src/sdk.d.ts",
       "import": "./src/sdk.js"
+    },
+    "./auth": {
+      "types": "./src/auth-browser.d.ts",
+      "import": "./src/auth-browser.js"
     }
   },
   "files": [
     "src/cli.js",
     "src/sdk.js",
     "src/sdk.d.ts",
-    "src/crypto.js"
+    "src/crypto.js",
+    "src/auth-browser.js",
+    "src/auth-browser.d.ts"
   ],
   "publishConfig": {
     "access": "public",

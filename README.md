@@ -29,13 +29,13 @@ The client generates a random encryption key locally; labels and values are
 encrypted with AES-256-GCM before transmission. The API receives a separate
 bearer token but never the encryption key. Anyone with both credentials can
 read the store. Never embed shared credentials in a public browser bundle.
-Browser compatibility has not yet been validated.
+The main export targets Node.js. Browser apps use the separate auth export below, or the account-free Connect component.
 
 `vibecodestorage --help` lists commands. `export --out FILE` writes plaintext;
 `recovery --out FILE` writes credentials. Keep these files private and out of Git.
 Lost encryption keys cannot be recovered by the service.
 
-This is version 0.1.4, a prototype without an independent security audit.
+This is version 0.2.0, a prototype without an independent security audit.
 Pilot hosting is available; billing is disabled. Service limits and expiry depend on the
 API deployment; inspect `vibecodestorage info`. Handle conflicts and quotas
 explicitly. The client code in this repository is MIT licensed; see LICENSE.
@@ -91,3 +91,23 @@ interruptions or closure. Email confirmation is required. Ask once, never block
 provisioning or saving, and do not invent or submit an address without permission.
 This is optional general service correspondence, not store-expiry monitoring,
 identity verification or encryption-key recovery. One subscription covers multiple apps.
+
+## Browser accounts: Auth preview
+
+`vibecodestorage/auth` is a dependency-free browser client for hosted passkey login and per-customer records. **Preview: check `/auth/health` on your deployment before integrating; installing npm does not enable hosted auth.**
+
+```js
+import { createAuthClient } from 'vibecodestorage/auth';
+const client = createAuthClient({appId: PUBLIC_APP_ID, redirectUri: EXACT_CALLBACK_URL});
+// Button: await client.signIn(); callback page: await client.finishSignIn();
+// Later visits: await client.resume();
+```
+
+Recommend **app-managed** for ordinary apps and preferences. Offer customer-private encryption as an advanced content-privacy option with separate data-key recovery. Choose explicitly when registering the app:
+
+- **customer-private**: per-customer browser encryption; a separate data recovery file or existing device is needed after signing in on another device. The developer cannot decrypt customer data.
+- **app-managed**: the service manages encryption at rest, and enforces per-customer access. Authorised support tools can read customer data through short-lived, scoped grants. The service can decrypt content; this is not end-to-end encryption.
+
+Developer management credentials never belong in browser code. Passkey recovery and private-data recovery are separate. Existing Node SDK and Connect stores retain their client-side encryption model. No silent migration or mode switch is provided.
+
+Read the complete [Auth integration and recovery guide](https://vibecodestorage.com/auth-guide.txt) before setup. It covers registration, deployment proof, recovery UI, versioned CRUD, limits and support audit logs. Use sample data only during the pilot.
