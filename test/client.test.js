@@ -50,3 +50,10 @@ test('uncertain creation response retries the same request; caller can persist a
   assert.equal(calls.length,3);for(const call of calls){assert.equal(call.headers['Idempotency-Key'],pending.requestId);assert.ok(!call.body.includes(pending.encryptionKey));}
   assert.deepEqual(first.store.credentials,resumed.store.credentials);
 });
+
+test('rate-limit details survive SDK errors and do not trigger creation retries',async t=>{
+ let calls=0; const retryAt='2026-10-07T00:00:00.000Z';
+ t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json({error:{code:'PROVISIONING_RATE_LIMIT',message:'Wait',retryAfterSeconds:600,retryAt}},{status:429,headers:{'Retry-After':'600'}});});
+ await assert.rejects(VibeCodeStorage.create(),error=>error.status===429&&error.code==='PROVISIONING_RATE_LIMIT'&&error.retryAfterSeconds===600&&error.retryAt===retryAt);
+ assert.equal(calls,1);
+});

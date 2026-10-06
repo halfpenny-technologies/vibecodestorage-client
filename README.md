@@ -1,6 +1,6 @@
 # VibeCodeStorage client
 
-JavaScript SDK and CLI for encrypted storage. Requires Node.js 24 or newer
+JavaScript SDK and CLI for encrypted storage. Requires Node.js 22 or newer
 and connects to the free pilot API at https://api.vibecodestorage.com by default.
 This repository contains the client only. The hosted API implementation remains private.
 
@@ -43,7 +43,7 @@ The main export targets Node.js. Browser apps use the separate auth export below
 `recovery --out FILE` writes credentials. Keep these files private and out of Git.
 Lost encryption keys cannot be recovered by the service.
 
-This is version 0.2.1, a prototype without an independent security audit.
+This is version 0.2.2, a prototype without an independent security audit.
 Pilot hosting is available; billing is disabled. Service limits and expiry depend on the
 API deployment; inspect `vibecodestorage info`. Handle conflicts and quotas
 explicitly. The client code in this repository is MIT licensed; see LICENSE.
@@ -55,7 +55,7 @@ Hosted service use is covered separately by the [pilot terms](https://vibecodest
 - `src/sdk.js`: HTTP requests, token handling and client-side encryption/decryption.
 - `src/cli.js`: local credential files, recovery and plaintext exports.
 
-Run `npm test` with Node.js 24+. Tests use synthetic data and a mocked transport;
+Run `npm test` with Node.js 22+. Tests use synthetic data and a mocked transport;
 they do not connect to the hosted service or require credentials.
 
 The root secret derives separate encryption and lookup keys. Each encrypted row
@@ -119,3 +119,13 @@ Recommend **app-managed** for ordinary apps and preferences. Offer customer-priv
 Developer management credentials never belong in browser code. Passkey recovery and private-data recovery are separate. Existing Node SDK and Connect stores retain their client-side encryption model. No silent migration or mode switch is provided.
 
 Read the complete [Auth integration and recovery guide](https://vibecodestorage.com/auth-guide.txt) before setup. It covers registration, deployment proof, recovery UI, versioned CRUD, limits and support audit logs. Use sample data only during the pilot.
+
+## Quickstart and reference
+
+The client has **zero runtime dependencies and no install scripts**. Node 22+ is supported; the private API server uses Node 24+.
+
+- [Short quickstart and path selection](https://vibecodestorage.com/quickstart.txt)
+- [SDK reference: methods, shapes, errors and metering](https://vibecodestorage.com/sdk-reference.txt)
+- [Single-file SDK](https://vibecodestorage.com/sdk-standalone.mjs) and [persistent setup helper without npm](https://vibecodestorage.com/storage-setup-standalone.mjs)
+
+Hosted Auth needs a public HTTPS callback and deployment proof. Local builds or shared cross-user views can use a Node backend; that app must implement user authentication and access rules.

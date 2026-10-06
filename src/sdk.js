@@ -21,7 +21,13 @@ export async function request(endpoint, path, { token, method = 'GET', body, hea
     body: body === undefined ? undefined : JSON.stringify(body)
   });
   const data = await res.json();
-  if (!res.ok) throw new VibeCodeStorageError(data.error?.message || 'API request failed', res.status, data.error?.code);
+  if (!res.ok) {
+    const error = new VibeCodeStorageError(data.error?.message || 'API request failed', res.status, data.error?.code);
+    const seconds = data.error?.retryAfterSeconds ?? Number(res.headers.get('Retry-After'));
+    if (Number.isFinite(seconds) && seconds > 0) error.retryAfterSeconds = seconds;
+    if (typeof data.error?.retryAt === 'string' && Number.isFinite(Date.parse(data.error.retryAt))) error.retryAt = data.error.retryAt;
+    throw error;
+  }
   return data;
 }
 

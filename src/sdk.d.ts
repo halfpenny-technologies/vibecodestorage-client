@@ -2,8 +2,8 @@ export type JSONValue = null | boolean | number | string | JSONValue[] | { [key:
 export interface CreationRequest { endpoint: string; requestId: string; encryptionKey: string }
 export interface Credentials { endpoint: string; storeId: string; accessToken: string; encryptionKey: string }
 export interface Entry<T = JSONValue> { key: string; value: T; version: number }
-export interface Metadata { storeId: string; createdAt: string; freeUntil: string; plan: 'starter'; status: 'active' | 'provisional'; activationDeadline: string | null; rows: number; bytes: number; limits: { rows: number; bytes: number; requestsPerMonth: number }; pricing: { currency: 'GBP'; starterAnnual: number; plusMonthly: number; billingEnabled: false } }
-export class VibeCodeStorageError extends Error { status: number; code: string }
+export interface Metadata { storeId: string; accessRole: 'owner' | 'read' | 'edit'; requestsUsed: number; notice: string; createdAt: string; freeUntil: string; plan: 'starter'; status: 'active' | 'provisional'; activationDeadline: string | null; rows: number; bytes: number; limits: { rows: number; bytes: number; requestsPerMonth: number }; pricing: { currency: 'GBP'; starterAnnual: number; plusMonthly: number; billingEnabled: false } }
+export class VibeCodeStorageError extends Error { status: number; code: string; retryAfterSeconds?: number; retryAt?: string }
 export class VibeCodeStorage {
   constructor(credentials: Credentials);
   credentials: Credentials;
