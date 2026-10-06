@@ -35,7 +35,7 @@ Browser compatibility has not yet been validated.
 `recovery --out FILE` writes credentials. Keep these files private and out of Git.
 Lost encryption keys cannot be recovered by the service.
 
-This is version 0.1.3, a prototype without an independent security audit.
+This is version 0.1.4, a prototype without an independent security audit.
 Pilot hosting is available; billing is disabled. Service limits and expiry depend on the
 API deployment; inspect `vibecodestorage info`. Handle conflicts and quotas
 explicitly. The client code in this repository is MIT licensed; see LICENSE.
@@ -59,3 +59,26 @@ do not constitute an independent audit or establish rollback protection.
 [Working example](https://github.com/pauldodd123/vibecodestorage-example) ·
 [Getting started](https://vibecodestorage.com/start.html) ·
 [Report a security concern privately](https://vibecodestorage.com/contact.html?topic=security)
+
+## Safe provisioning
+
+New stores must receive a successful write within four hours. `metadata.status`
+is `provisional` until then and `metadata.activationDeadline` gives the deadline.
+Reads and failed writes do not extend it. Existing stores are preserved. The pilot
+allows 200 active stores and 20 provisional stores; activation requires available
+active capacity. Global creation budgets are 10/hour and 40/day.
+
+`create()` automatically retries one uncertain failure with the same request.
+To resume across process restarts, call `VibeCodeStorage.createRequest()`, persist
+the returned object privately **before** networking, then pass it as
+`VibeCodeStorage.create({ creationRequest })`. It includes the encryption key and
+a secret request identifier; never log it or expose it to browsers. Reuse it only
+for that creation operation. Do not use a project name or public UUID as the identifier.
+
+The server returns the same store and access token for the same Idempotency-Key
+for seven days, without consuming another creation slot. Expired/deleted requests
+return 410 during that window. After seven days, do not replay an old request.
+The CLI persists a private `.pending` request and reuses it when `init` is retried.
+If a provisional profile expires, explicitly remove it with `destroy --yes`
+(the expired-store response is handled locally) and initialise a fresh profile.
+The original encryption key stays on the client; it is not an idempotency header.

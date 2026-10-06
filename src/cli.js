@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { VibeCodeStorage, validateEndpoint } from './sdk.js';
 
-const help = `VibeCodeStorage 0.1.2 — encrypted app storage
+const help = `VibeCodeStorage 0.1.4 — encrypted app storage
 
   vibecodestorage init [--endpoint URL] [--profile NAME] [--json]
   vibecodestorage info
@@ -25,7 +25,7 @@ Default endpoint: https://api.vibecodestorage.com (free pilot).
 For a local API, use init --endpoint http://127.0.0.1:8787.
 Credentials are kept outside your project, under ~/.config/vibecodestorage.
 Default profile follows your working directory. --profile NAME selects a named profile.
-Pilot hosting is live. Billing is disabled.
+New stores need a successful write within four hours. Billing is disabled.
 `;
 
 function emit(value) { process.stdout.write(JSON.stringify(value, null, 2) + '\n'); }
@@ -67,7 +67,15 @@ try {
     try {
       if (command === 'init') {
         const endpoint = validateEndpoint(values.endpoint || process.env.VCS_ENDPOINT || 'https://api.vibecodestorage.com');
-        created = await VibeCodeStorage.create({ endpoint });
+        const pendingFile = configFile + '.pending';
+        let creationRequest;
+        try { creationRequest = JSON.parse(await readFile(pendingFile, 'utf8')); }
+        catch (error) {
+          if (error.code !== 'ENOENT') throw error;
+          creationRequest = VibeCodeStorage.createRequest({ endpoint });
+          await writePrivate(pendingFile, creationRequest);
+        }
+        created = await VibeCodeStorage.create({ endpoint, creationRequest });
       } else {
         if (!values.file) throw new Error('restore requires --file');
         const recovery = JSON.parse(await readFile(resolve(values.file), 'utf8'));
@@ -77,11 +85,12 @@ try {
         created = { store, metadata: await store.info() };
       }
       await file.writeFile(JSON.stringify(created.store.credentials, null, 2) + '\n');
+      if(command === 'init') await unlink(configFile + '.pending').catch(() => {});
       emit({ profile, credentialsFile: configFile, ...created.metadata,
-        next: 'Use set/get/list. Create a recovery file before moving to another device. Credentials are secret; never bundle them into a public website.' });
+        next: 'Make a successful write within four hours to activate this new store. Use set/get/list. Create a recovery file before moving to another device. Credentials are secret; never bundle them into a public website.' });
     } catch (error) {
-      // Roll back only a newly created store, never one restored from a recovery file.
-      if (command === 'init' && created) await created.store.destroy().catch(() => {});
+      if(command === 'init' && error.code === 'PROVISIONING_EXPIRED') await unlink(configFile + '.pending').catch(() => {});
+      // Keep the pending request after other failures so init can safely resume.
       await unlink(configFile).catch(() => {});
       throw error;
     } finally { await file.close(); }
@@ -111,7 +120,7 @@ try {
     emit({ saved: path, sensitive: true, kind: command });
   } else if (command === 'destroy') {
     if (!values.yes) throw new Error('destroy permanently removes the store; add --yes to confirm');
-    await store.destroy();
+    try { await store.destroy(); } catch(error) { if(error.code !== "PROVISIONING_EXPIRED") throw error; }
     await unlink(configFile);
     emit({ deleted: true });
   }

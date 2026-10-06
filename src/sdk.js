@@ -31,10 +31,23 @@ export class VibeCodeStorage {
     if (!/^[A-Za-z0-9_-]{24}$/.test(credentials.storeId)) throw new Error('Invalid store ID');
     this.keys = keysFromSecret(credentials.encryptionKey);
   }
-  static async create({ endpoint = 'https://api.vibecodestorage.com' } = {}) {
-    const encryptionKey = newSecret(); // Never transmitted.
-    const created = await request(endpoint, '/v1/stores', { method: 'POST', body: {} });
-    return { store: new VibeCodeStorage({ endpoint, storeId: created.storeId, accessToken: created.accessToken, encryptionKey }), metadata: created.metadata };
+  static createRequest({ endpoint = 'https://api.vibecodestorage.com' } = {}) {
+    return { endpoint: validateEndpoint(endpoint), requestId: newSecret(), encryptionKey: newSecret() };
+  }
+  static async create({ endpoint, creationRequest } = {}) {
+    const pending = creationRequest || VibeCodeStorage.createRequest({ endpoint });
+    if (endpoint && validateEndpoint(endpoint) !== pending.endpoint) throw new Error('Creation request belongs to a different endpoint');
+    if (!/^[A-Za-z0-9_-]{43}$/.test(pending.requestId || '')) throw new Error('Invalid creation request identifier');
+    await keysFromSecret(pending.encryptionKey);
+    const send = () => request(pending.endpoint, '/v1/stores', { method: 'POST', body: {}, headers: { 'Idempotency-Key': pending.requestId } });
+    let created;
+    try { created = await send(); }
+    catch (error) {
+      // One retry only for uncertain transport/server failures, with identical secrets.
+      if (error.status && error.status < 500) throw error;
+      created = await send();
+    }
+    return { store: new VibeCodeStorage({ endpoint: pending.endpoint, storeId: created.storeId, accessToken: created.accessToken, encryptionKey: pending.encryptionKey }), metadata: created.metadata };
   }
   get path() { return `/v1/stores/${this.credentials.storeId}`; }
   call(path, options = {}) { return request(this.credentials.endpoint, this.path + path, { ...options, token: this.credentials.accessToken }); }

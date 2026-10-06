@@ -1,6 +1,6 @@
 {
   "name": "vibecodestorage",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Encrypted storage JavaScript SDK and CLI. Connect to your own VibeCodeStorage API.",
   "type": "module",
   "engines": {

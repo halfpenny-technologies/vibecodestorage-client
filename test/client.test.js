@@ -41,3 +41,12 @@ test('remote endpoints require HTTPS and reject credentials or query strings', (
   assert.equal(validateEndpoint('http://127.0.0.1:8787'), 'http://127.0.0.1:8787');
   for (const endpoint of ['http://example.com', 'https://user:secret@example.com', 'https://example.com?token=secret']) assert.throws(() => validateEndpoint(endpoint));
 });
+
+test('uncertain creation response retries the same request; caller can persist and reuse secrets', async t => {
+  const calls=[];t.mock.method(globalThis,'fetch',async (_url,options)=>{calls.push(options);if(calls.length===1)throw new TypeError('Connection lost');return Response.json({storeId:'b'.repeat(24),accessToken:'synthetic-token',metadata:{}});});
+  const pending=VibeCodeStorage.createRequest({endpoint:'https://example.invalid'});
+  const first=await VibeCodeStorage.create({creationRequest:pending});
+  const resumed=await VibeCodeStorage.create({creationRequest:pending});
+  assert.equal(calls.length,3);for(const call of calls){assert.equal(call.headers['Idempotency-Key'],pending.requestId);assert.ok(!call.body.includes(pending.encryptionKey));}
+  assert.deepEqual(first.store.credentials,resumed.store.credentials);
+});
