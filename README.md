@@ -14,9 +14,8 @@ vibecodestorage get settings
 ```
 
 For a local server, use `--endpoint http://127.0.0.1:8787`.
-The published npm package is version 0.1.2. This repository contains the same
-client implementation, now under the MIT licence. The existing npm 0.1.2 archive
-predates this licensing change; no replacement npm release has been made yet.
+Source: [halfpenny-technologies/vibecodestorage-client](https://github.com/halfpenny-technologies/vibecodestorage-client).
+The SDK, CLI and encryption helpers are MIT licensed; see LICENSE.
 
 ```js
 import { VibeCodeStorage } from 'vibecodestorage';
@@ -36,7 +35,7 @@ Browser compatibility has not yet been validated.
 `recovery --out FILE` writes credentials. Keep these files private and out of Git.
 Lost encryption keys cannot be recovered by the service.
 
-This is version 0.1.2, a prototype without an independent security audit.
+This is version 0.1.3, a prototype without an independent security audit.
 Pilot hosting is available; billing is disabled. Service limits and expiry depend on the
 API deployment; inspect `vibecodestorage info`. Handle conflicts and quotas
 explicitly. The client code in this repository is MIT licensed; see LICENSE.
