@@ -6,7 +6,8 @@ import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { VibeCodeStorage, validateEndpoint } from './sdk.js';
 
-const help = `VibeCodeStorage 0.1.4 — encrypted app storage
+const { version: packageVersion } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+const help = `VibeCodeStorage ${packageVersion} — encrypted app storage
 
   vibecodestorage init [--endpoint URL] [--profile NAME] [--json]
   vibecodestorage info

@@ -13,6 +13,14 @@ vibecodestorage set settings '{"theme":"dark"}'
 vibecodestorage get settings
 ```
 
+For the CLI through Homebrew:
+
+```sh
+brew install halfpenny-technologies/tap/vibecodestorage
+```
+
+[Official Halfpenny Technologies tap](https://github.com/halfpenny-technologies/homebrew-tap). Homebrew installs the CLI and Node 24; use npm for JavaScript imports. An upgrade does not require creating another store.
+
 For a local server, use `--endpoint http://127.0.0.1:8787`.
 Source: [halfpenny-technologies/vibecodestorage-client](https://github.com/halfpenny-technologies/vibecodestorage-client).
 The SDK, CLI and encryption helpers are MIT licensed; see LICENSE.
@@ -35,7 +43,7 @@ The main export targets Node.js. Browser apps use the separate auth export below
 `recovery --out FILE` writes credentials. Keep these files private and out of Git.
 Lost encryption keys cannot be recovered by the service.
 
-This is version 0.2.0, a prototype without an independent security audit.
+This is version 0.2.1, a prototype without an independent security audit.
 Pilot hosting is available; billing is disabled. Service limits and expiry depend on the
 API deployment; inspect `vibecodestorage info`. Handle conflicts and quotas
 explicitly. The client code in this repository is MIT licensed; see LICENSE.
