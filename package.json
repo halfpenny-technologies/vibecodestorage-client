@@ -1,0 +1,40 @@
+{
+  "name": "vibecodestorage",
+  "version": "0.1.2",
+  "description": "Encrypted storage JavaScript SDK and CLI. Connect to your own VibeCodeStorage API.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "vibecodestorage": "src/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/sdk.d.ts",
+      "import": "./src/sdk.js"
+    }
+  },
+  "files": [
+    "src/cli.js",
+    "src/sdk.js",
+    "src/sdk.d.ts",
+    "src/crypto.js"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halfpenny-technologies/vibecodestorage-client.git"
+  },
+  "homepage": "https://vibecodestorage.com",
+  "bugs": {
+    "url": "https://github.com/halfpenny-technologies/vibecodestorage-client/issues"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
