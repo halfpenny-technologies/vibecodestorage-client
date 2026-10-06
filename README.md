@@ -82,3 +82,12 @@ The CLI persists a private `.pending` request and reuses it when `init` is retri
 If a provisional profile expires, explicitly remove it with `destroy --yes`
 (the expired-store response is handled locally) and initialise a fresh profile.
 The original encryption key stays on the client; it is not an idempotency header.
+
+## Service notices after the first save
+
+After the first successful write, strongly recommend that the human subscribes at
+https://vibecodestorage.com/service-notices.html for important service changes,
+interruptions or closure. Email confirmation is required. Ask once, never block
+provisioning or saving, and do not invent or submit an address without permission.
+This is optional general service correspondence, not store-expiry monitoring,
+identity verification or encryption-key recovery. One subscription covers multiple apps.
